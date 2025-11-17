@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Homework Notice</title>
+<style>
+  :root{
+    --bg1:#0f172a; --bg2:#0b1220; --accent: #7c3aed;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{
+    background: linear-gradient(120deg,var(--bg1), #071029 40%, #041122);
+    overflow:hidden;
+    color: #e6eef8;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .gradient {
+    position:fixed; inset:-20%;
+    background: conic-gradient(from 200deg at 50% 50%, rgba(124,58,237,0.12), rgba(14,165,233,0.08), rgba(124,58,237,0.12));
+    filter: blur(60px) saturate(120%);
+    animation: rotate 18s linear infinite;
+    pointer-events:none;
+    z-index:0;
+    mix-blend-mode:screen;
+  }
+  @keyframes rotate { to { transform: rotate(1turn); } }
+
+  .blob {
+    position: absolute;
+    width: 420px; height:420px;
+    border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, rgba(124,58,237,0.16), transparent 40%),
+                radial-gradient(circle at 70% 70%, rgba(14,165,233,0.12), transparent 35%);
+    filter: blur(28px);
+    animation: float 8s ease-in-out infinite;
+    z-index:0;
+  }
+  .blob.b1{ left:-10%; top: -5%; animation-duration:11s; }
+  .blob.b2{ right:-15%; bottom:-10%; animation-duration:14s; transform:scale(0.9); }
+  @keyframes float {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(20px) scale(1.02); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  .wrap{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:4rem;
+  }
+  h1#hero{
+    font-size: clamp(28px, 6vw, 64px);
+    margin:0;
+    line-height:1.05;
+    letter-spacing: -0.02em;
+    text-shadow: 0 6px 20px rgba(2,6,23,0.65);
+    background: linear-gradient(90deg,#e6eef8 0%, #c9e6ff 40%, #b9d7ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: transform .25s ease;
+    transform-origin: center;
+    padding: 0 1rem;
+    cursor: default;
+  }
+  h1#hero.small { font-size: clamp(20px,4.2vw,40px); }
+
+  p.sub {
+    margin-top: .85rem;
+    color: rgba(230,238,248,0.75);
+    opacity:0.95;
+    font-size: clamp(12px,1.6vw,16px);
+  }
+
+  .pryce-btn{
+    position:fixed;
+    left:16px; top:16px;
+    z-index:3;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.06);
+    color: #fff;
+    backdrop-filter: blur(6px) saturate(120%);
+    padding: .5rem .85rem;
+    border-radius: 10px;
+    cursor:pointer;
+    font-weight:600;
+    letter-spacing: .6px;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+    transform-origin: left top;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .pryce-btn:hover{ transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(2,6,23,0.7); }
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(2,6,23,0.55); display:flex; align-items:center; justify-content:center;
+    z-index:6; opacity:0; pointer-events:none; transition:opacity .18s ease;
+  }
+  .modal-backdrop.show{ opacity:1; pointer-events:auto; }
+  .modal {
+    width: min(720px, 92%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 12px 40px rgba(2,6,23,0.7);
+    border: 1px solid rgba(255,255,255,0.04);
+    transform: translateY(14px) scale(.99);
+    transition: transform .18s ease;
+  }
+  .modal-backdrop.show .modal{ transform: translateY(0) scale(1); }
+
+  .modal h3{ margin:0 0 .6rem 0; color:#eaf4ff; font-size:18px; }
+  .modal textarea{
+    width:100%; min-height:120px; resize:vertical;
+    padding:.8rem; border-radius:8px; border:1px solid rgba(255,255,255,0.04);
+    background: rgba(2,6,23,0.55); color:#e9f5ff; font-size:15px;
+    outline:none; box-shadow: inset 0 2px 10px rgba(2,6,23,0.4);
+  }
+  .modal .row{ display:flex; gap:.6rem; justify-content:flex-end; margin-top:.8rem; }
+  .btn { padding:.5rem .8rem; border-radius:8px; cursor:pointer; border:0; font-weight:600;}
+  .btn.ghost{ background:transparent; color:#cfe8ff; border:1px solid rgba(255,255,255,0.04); }
+  .btn.primary{ background: linear-gradient(90deg,#7c3aed,#06b6d4); color:white; box-shadow: 0 8px 24px rgba(7,12,34,0.6); }
+
+  @media (max-width:520px){
+    .pryce-btn{ left:10px; top:10px; padding:.45rem .6rem; }
+    h1#hero{ padding:0 .6rem; }
+  }
+
+  @keyframes pop {
+    0%{ transform: translateY(0) scale(1); }
+    50%{ transform: translateY(-6px) scale(1.01); }
+    100%{ transform: translateY(0) scale(1); }
+  }
+  #hero { animation: pop 10s ease-in-out infinite; }
+
+  .hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); color:rgba(230,238,248,0.5); font-size:12px; z-index:2; }
+</style>
+</head>
+<body>
+  <div class="gradient"></div>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+
+  <button class="pryce-btn" id="pryceBtn">Pryce</button>
+
+  <main class="wrap">
+    <div>
+      <h1 id="hero">this was just for a homework</h1>
+      <p class="sub">Tip: press <strong>Pryce</strong> (top-left) to edit after entering a password.</p>
+    </div>
+  </main>
+
+  <div class="hint">Live-backed by Firebase Realtime Database</div>
+
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h3>Edit public text</h3>
+      <textarea id="editArea" maxlength="420"></textarea>
+      <div class="row">
+        <button class="btn ghost" id="cancelBtn">Cancel</button>
+        <button class="btn primary" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase COMPAT SDK (needed for older syntax) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    /* -------------------- YOUR REAL FIREBASE CONFIG -------------------- */
+    const firebaseConfig = {
+      apiKey: "AIzaSyDjv0wKx8iGIn1QQ05XCFQXkv4iHlh62dQ",
+      authDomain: "raheim-89c90.firebaseapp.com",
+      databaseURL: "https://raheim-89c90-default-rtdb.firebaseio.com",
+      projectId: "raheim-89c90",
+      storageBucket: "raheim-89c90.firebasestorage.app",
+      messagingSenderId: "796021534464",
+      appId: "1:796021534464:web:fb9c83583aaab9a4facde5",
+      measurementId: "G-BYRFQTPR6P"
+    };
+    /* ------------------------------------------------------------------ */
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const DB_KEY = "homepage_text_for_homework";
+
+    const hero = document.getElementById("hero");
+    const pryceBtn = document.getElementById("pryceBtn");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const editArea = document.getElementById("editArea");
+    const saveBtn = document.getElementById("saveBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+
+    const PASSWORD = "madking";
+
+    const ref = db.ref(DB_KEY);
+    ref.on("value", snap => {
+      const val = snap.val();
+      if (val) {
+        hero.textContent = val;
+      }
+    });
+
+    pryceBtn.addEventListener("click", () => {
+      const pass = prompt("Enter password:");
+      if (pass === PASSWORD) {
+        editArea.value = hero.textContent;
+        modalBackdrop.classList.add("show");
+      } else {
+        alert("Wrong password!");
+      }
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      modalBackdrop.classList.remove("show");
+    });
+
+    saveBtn.addEventListener("click", async () => {
+      const newText = editArea.value.trim();
+      await ref.set(newText);
+      hero.textContent = newText;
+      modalBackdrop.classList.remove("show");
+    });
+  </script>
+</body>
+</html>
